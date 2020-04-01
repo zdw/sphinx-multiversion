@@ -16,6 +16,7 @@ from sphinx import project as sphinx_project
 
 from . import sphinx
 from . import git
+from . import prep
 
 
 def main(argv=None):
@@ -95,6 +96,7 @@ def main(argv=None):
         "smv_outputdir_format", sphinx.DEFAULT_OUTPUTDIR_FORMAT, "html", str
     )
     config.add("smv_prefer_remote_refs", False, "html", bool)
+    config.add("prep_commands", [], "html", list)
     config.pre_init_values()
     config.init_values()
 
@@ -209,6 +211,11 @@ def main(argv=None):
         for version_name, data in metadata.items():
             outdir = os.path.join(args.outputdir, data["outputdir"])
             os.makedirs(outdir, exist_ok=True)
+
+            # Run prep commands, if they exist
+            if config.prep_commands:
+                print("Prep Commands found: %s" % config.prep_commands)
+                prep.prep_commands(config.prep_commands, os.path.abspath(sourcedir), data["sourcedir"])
 
             current_argv = argv.copy()
             current_argv.extend(["-v"] * (args.verbosity - 1))
